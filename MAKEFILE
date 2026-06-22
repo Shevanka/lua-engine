@@ -8,5 +8,8 @@ OUT = lua-engine
 all:
 	$(CC) $(CFLAGS) $(SRC) -o $(OUT) $(LIBS)
 
+main: main.c
+	gcc -o main main.c
+
 clean:
 	rm -f $(OUT)
