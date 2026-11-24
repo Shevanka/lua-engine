@@ -25,12 +25,14 @@ static int binding_get_time(lua_State *L)
 }
 
 // Engine.add(a, b) -> number
-// Contoh fungsi matematika dari C
+// Contoh fungsi matematika dari C.
+// lua_arith dipakai agar integer + integer tetap integer (10 + 32 = 42, bukan 42.0)
 static int binding_add(lua_State *L)
 {
-    double a = luaL_checknumber(L, 1);
-    double b = luaL_checknumber(L, 2);
-    lua_pushnumber(L, a + b);
+    luaL_checknumber(L, 1);
+    luaL_checknumber(L, 2);
+    lua_settop(L, 2);
+    lua_arith(L, LUA_OPADD);
     return 1;
 }
 
@@ -46,17 +48,35 @@ static int binding_read_file(lua_State *L)
         return 1;
     }
 
-    // Baca seluruh isi file
-    fseek(f, 0, SEEK_END);
+    // Hitung ukuran file
+    if (fseek(f, 0, SEEK_END) != 0)
+    {
+        fclose(f);
+        lua_pushnil(L);
+        return 1;
+    }
     long size = ftell(f);
     rewind(f);
+    if (size < 0)
+    {
+        fclose(f);
+        lua_pushnil(L);
+        return 1;
+    }
 
-    char *buffer = (char *)malloc(size + 1);
-    fread(buffer, 1, size, f);
-    buffer[size] = '\0';
+    char *buffer = (char *)malloc((size_t)size + 1);
+    if (!buffer)
+    {
+        fclose(f);
+        return luaL_error(L, "readFile: memori tidak cukup untuk %s", path);
+    }
+
+    // Baca seluruh isi file
+    size_t dibaca = fread(buffer, 1, (size_t)size, f);
     fclose(f);
 
-    lua_pushstring(L, buffer); // Kembalikan isi file ke Lua
+    // pushlstring menyalin persis 'dibaca' byte, aman untuk file yang berisi byte NUL
+    lua_pushlstring(L, buffer, dibaca);
     free(buffer);
     return 1;
 }
