@@ -105,6 +105,16 @@ function addItem(itemId, amount)
     table.insert(inventory, {id = itemId, name = "Item" .. itemId, amount = amount})
 end
 
+-- Baca angka dari input; kembalikan nil kalau input habis (EOF) atau bukan angka
+function readNumber(prompt)
+    io.write(prompt)
+    local line = io.read()
+    if line == nil then
+        return nil, true
+    end
+    return tonumber(line), false
+end
+
 while true do
     print("")
     print("=== MINI FARM WORLD ===")
@@ -115,43 +125,51 @@ while true do
     print("5. Lihat map")
     print("6. Pukul tile")
     print("7. Keluar")
-    io.write("Pilih menu: ")
+    local pilihan, eof = readNumber("Pilih menu: ")
 
-    local pilihan = tonumber(io.read())
+    if eof then
+        print("")
+        print("Input selesai. Program berhenti.")
+        break
+    end
 
     if pilihan == 1 then
         showPosition()
 
     elseif pilihan == 2 then
-        io.write("Masukkan X: ")
-        local x = tonumber(io.read())
+        local x = readNumber("Masukkan X: ")
+        local y = readNumber("Masukkan Y: ")
 
-        io.write("Masukkan Y: ")
-        local y = tonumber(io.read())
-
-        moveTo(x, y)
+        if x and y then
+            moveTo(x, y)
+        else
+            print("Koordinat harus berupa angka.")
+        end
 
     elseif pilihan == 3 then
         showInventory()
 
     elseif pilihan == 4 then
-        io.write("Masukkan item ID: ")
-        local id = tonumber(io.read())
+        local id = readNumber("Masukkan item ID: ")
 
-        local amount = checkAmount(id)
-        print("Jumlah item ID " .. id .. ": " .. amount)
+        if id then
+            print("Jumlah item ID " .. id .. ": " .. checkAmount(id))
+        else
+            print("Item ID harus berupa angka.")
+        end
 
     elseif pilihan == 5 then
         showWorld()
 
     elseif pilihan == 6 then
-        io.write("Masukkan X tile: ")
-        local x = tonumber(io.read())
+        local x = readNumber("Masukkan X tile: ")
+        local y = readNumber("Masukkan Y tile: ")
 
-        io.write("Masukkan Y tile: ")
-        local y = tonumber(io.read())
-
-        hitTile(x, y)
+        if x and y then
+            hitTile(x, y)
+        else
+            print("Koordinat harus berupa angka.")
+        end
 
     elseif pilihan == 7 then
         print("Program selesai.")

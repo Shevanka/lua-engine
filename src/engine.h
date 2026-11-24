@@ -22,7 +22,4 @@ int engine_run_file(LuaEngine *engine, const char *filepath);
 // Jalankan string Lua langsung
 int engine_run_string(LuaEngine *engine, const char *code);
 
-// Register semua custom binding
-void engine_register_bindings(LuaEngine *engine);
-
 #endif
